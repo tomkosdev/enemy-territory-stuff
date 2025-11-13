@@ -1,0 +1,259 @@
+game_manager
+{
+	spawn
+	{
+		// tijden
+		wm_set_round_timelimit 10
+		wm_axis_respawntime 3
+		wm_allied_respawntime 3
+
+		// charge times
+		setchargetimefactor 0 soldier		1
+		setchargetimefactor 0 medic		1
+		setchargetimefactor 0 engineer		1
+		setchargetimefactor 0 fieldops		1
+		setchargetimefactor 0 covertops		1
+
+		setchargetimefactor 1 soldier		1
+		setchargetimefactor 1 medic		1
+		setchargetimefactor 1 engineer		1
+		setchargetimefactor 1 fieldops		1
+		setchargetimefactor 1 covertops		1
+
+
+		// Stopwatch mode verdedigers (0=Axis, 1=Allies):
+		wm_set_defending_team 1
+
+		// huidige winnaar (0=Axis, 1=Allies):
+		wm_setwinner 1
+
+
+		// objectives:
+		wm_number_of_objectives 8
+
+		// Objective overview status indicators
+		//wm_objective_status <objective> <team (0=Axis, 1=Allies)> <status (0=neutral 1=complete 2=failed)>
+		wm_objective_status 1 0 0
+		wm_objective_status 1 1 0
+		wm_objective_status 2 0 0
+		wm_objective_status 2 1 0
+		wm_objective_status 3 0 0
+		wm_objective_status 3 1 0
+		wm_objective_status 4 0 0
+		wm_objective_status 4 1 1
+		wm_objective_status 5 0 0
+		wm_objective_status 5 1 0
+		wm_objective_status 6 0 0
+		wm_objective_status 6 1 0
+		wm_objective_status 7 0 0
+		wm_objective_status 7 1 0
+		wm_objective_status 8 0 0
+		wm_objective_status 8 1 0
+
+		// huidig objective:
+		wm_set_main_objective	1	0
+		wm_set_main_objective	1	1
+
+
+		wait 200
+
+
+		setstate west_ammocabinet0 invisible
+		setstate west_healthcabinet0 invisible
+		setstate east_ammocabinet0 invisible
+		setstate east_healthcabinet0 invisible
+		setstate ammo7 invisible
+		setstate health7 invisible
+		setstate ammo1 invisible
+		setstate health1 invisible
+		setstate ammokast4 invisible
+		setstate healthkast4 invisible
+		setstate ammokast5 invisible
+		setstate healthkast2 invisible 
+
+		setstate ammo7_target invisible
+		setstate ammo1_target invisible
+		setstate ammokast4_trigger invisible
+		setstate ammokast5_trigger invisible
+		setstate west_trigger_ammo0 invisible
+		setstate east_trigger_ammo0 invisible
+
+		setstate health7_target invisible
+		setstate health1_target invisible
+		setstate healthkast2_trigger invisible
+		setstate healthkast4_trigger invisible
+		setstate west_trigger_heal0 invisible
+		setstate east_trigger_heal0 invisible
+		
+		setstate west_hacabinet_cm_marker invisible 
+		setstate t52 invisible 
+		setstate east_hacabinet_cm_marker invisible 
+		setstate t56 invisible 
+		setstate west_hacabinet_cm_marker1 invisible 
+		setstate east_hacabinet_cm_marker1 invisible 
+
+		setstate west_hacabinet_toi invisible 
+		setstate east_hacabinet_toi invisible 
+		setstate west_hacabinet_toi1 invisible 
+		setstate east_hacabinet_toi1 invisible 
+		
+	}
+}
+
+//--- De trein -------------------------------------------------
+allies_train_sound						// info_notnull
+{
+	trigger move
+	{
+		trigger allies_train sound_move
+	}
+}
+
+allies_train							// script_mover
+{
+	spawn
+	{
+		wait 200
+		setposition allies_train_path_0
+	}
+
+	// laat de trein rijden van path_0 naar path_1
+	trigger move_0_to_1
+	{
+		setstate allies_train_switch_0 invisible
+		setstate allies_train_switch_1 invisible
+		trigger self sound_move
+		gotomarker allies_train_path_1 100 wait
+		trigger self nosound
+		setstate allies_train_switch_0 invisible
+		setstate allies_train_switch_1 default
+	}
+
+	// laat de trein rijden van path_1 naar path_0
+	trigger move_1_to_0
+	{
+		setstate allies_train_switch_0 invisible
+		setstate allies_train_switch_1 invisible
+		trigger self sound_move
+		gotomarker allies_train_path_0 100 wait
+		trigger self nosound
+		setstate allies_train_switch_0 default
+		setstate allies_train_switch_1 invisible
+	}
+
+	// geluid dat met de trein meegaat
+	trigger sound_move
+	{
+		stopsound
+		playsound sound/tug_move.wav looping volume 512
+	}
+	trigger nosound
+	{
+		stopsound
+	}
+}
+
+allies_train_switch_0						// func_invisible_user
+{
+	spawn
+	{
+		wait 200
+		setstate allies_train_switch_0 default
+	}
+	activate
+	{
+		trigger allies_train move_0_to_1
+	}
+}
+
+allies_train_switch_1						// func_invisible_user
+{
+	spawn
+	{
+		wait 200
+		setstate allies_train_switch_1 invisible
+	}
+	activate
+	{
+		trigger allies_train move_1_to_0
+	}
+}
+
+
+axis_train_sound						// info_notnull
+{
+	trigger move
+	{
+		trigger axis_train sound_move
+	}
+}
+
+axis_train							// script_mover
+{
+	spawn
+	{
+		wait 200
+		setposition axis_train_path_0
+	}
+
+	// laat de trein rijden van path_0 naar path_1
+	trigger move_0_to_1
+	{
+		setstate axis_train_switch_0 invisible
+		setstate axis_train_switch_1 invisible
+		trigger self sound_move
+		gotomarker axis_train_path_1 100 wait
+		trigger self nosound
+		setstate axis_train_switch_0 invisible
+		setstate axis_train_switch_1 default
+	}
+
+	// laat de trein rijden van path_1 naar path_0
+	trigger move_1_to_0
+	{
+		setstate axis_train_switch_0 invisible
+		setstate axis_train_switch_1 invisible
+		trigger self sound_move
+		gotomarker axis_train_path_0 100 wait
+		trigger self nosound
+		setstate axis_train_switch_0 default
+		setstate axis_train_switch_1 invisible
+	}
+
+	// geluid dat met de trein meegaat
+	trigger sound_move
+	{
+		stopsound
+		playsound sound/tug_move.wav looping volume 512
+	}
+	trigger nosound
+	{
+		stopsound
+	}
+}
+
+axis_train_switch_0						// func_invisible_user
+{
+	spawn
+	{
+		wait 200
+		setstate axis_train_switch_0 default
+	}
+	activate
+	{
+		trigger axis_train move_0_to_1
+	}
+}
+
+axis_train_switch_1						// func_invisible_user
+{
+	spawn
+	{
+		wait 200
+		setstate axis_train_switch_1 invisible
+	}
+	activate
+	{
+		trigger axis_train move_1_to_0
+	}
+}

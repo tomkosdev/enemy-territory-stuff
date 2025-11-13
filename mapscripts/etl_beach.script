@@ -1,0 +1,795 @@
+//Brush Scripting
+//Map: etl_beach
+//Last edited by: suber
+//27-07-23
+//uips - flag script
+//
+// GLOBAL ACCUMS
+// =============
+//
+// GLOBALACCUM 0
+//	BIT 0 = SEA WALL BREACHED
+//	BIT 1 = SIDE DOOR BREACHED
+//	BIT 2 = ALARM ALREADY SOUNDED
+// GLOBALACCUM 1:	Permanent spawn for Allies when they capture Forward Bunker (0-disabled; 1-enabled)
+// GLOBALACCUM 2:	Additional Allied spawn points in Supply Bunker when they build CP (0-disabled; 1-enabled)
+// GLOBALACCUM 3:	Additional Axis spawn points in Barracks when they build CP (0-disabled; 1-enabled)
+// GLOBALACCUM 4:	Ladder in Forward Bunker (0-disabled; 1-enabled)
+// GLOBALACCUM 5:	Enable shutters in Main Bunker windows (0-disabled; 1-enabled)
+// GLOBALACCUM 6:	MG42 1 in Main Bunker (0-disabled; 1-enabled)
+// GLOBALACCUM 7:	MG42 2 in Main Bunker (0-disabled; 1-enabled)
+// GLOBALACCUM 8:	MG42 3 in Forward Bunker (0-disabled; 1-enabled)
+// GLOBALACCUM 9:	MG42 4 in Forward Bunker (0-disabled; 1-enabled)
+
+game_manager
+{
+	spawn
+	{
+        // Set the respawn times
+        wm_axis_respawntime	35
+		wm_allied_respawntime	25
+		wm_number_of_objectives 6
+		wm_set_round_timelimit  19
+		
+		wait 150
+		
+		// Set spawn locations
+		setautospawn "Axis Main Bunker" 0
+		setautospawn "Allied North Beach" 1
+
+		// Axis control all objectives at the start (0 == AXIS, 1 == ALLIED)
+		wm_objective_status		1	0	0	//SideWall
+		wm_objective_status		1	1	0	//SideWall
+		wm_objective_status		2	0	0	//DocStat
+		wm_objective_status		2	1	0	//DocStat
+		wm_objective_status		3	0	0	//Transmit
+		wm_objective_status		3	1	0	//Transmit
+		wm_objective_status		4	0	0	//FlagPole
+		wm_objective_status		4	1	0	//FlagPole
+		wm_objective_status		5	0	0	//SideDoor
+		wm_objective_status		5	1	0	//SideDoor
+		wm_objective_status 	6 	0	0	//ComPost
+		wm_objective_status		6 	1	0	//ComPost
+		wm_objective_status 	7	0	0	//LMS
+		wm_objective_status 	7 	1	0	//LMS
+		
+		// Set Defending Team for SW Mode
+        wm_set_defending_team	0
+
+		// If the round timer expires, the Axis have won, so set the current winning team
+		// Set the round winner:  0 == AXIS, 1 == ALLIED
+		wm_setwinner 0
+
+		// Accum #1 will be the state of objective number one
+		accum 1 set 0
+		
+		// Hides Forward Bunker flag icon
+		setstate beach_flag_wobj invisible
+		
+        //====OPTIONAL SETTINGS==============================================================
+		wait 1000
+		// Toggle the line of the respective setting you want to change by (un-)commenting.
+		
+		// SPAWNING
+		globalaccum 1 set 1		// Enable permanent spawn for Allies when they capture Forward Bunker (default yes)
+		globalaccum 2 set 1		// Enable additional Allied spawn points in Supply Bunker when they build CP (default yes)
+		globalaccum 3 set 1		// Enable additional Axis spawn points in Barracks when they build CP (default yes)
+		
+		// MAP FEATURES
+		//globalaccum 4 set 1			// Enable ladder in Forward Bunker (default yes)
+		// globalaccum 5 set 1		// Enable shutters in Main Bunker windows (default no)
+		globalaccum 6 set 1		// Enable MG42 1 (default yes)
+		globalaccum 7 set 1		// Enable MG42 2 (default yes)
+		globalaccum 8 set 1		// Enable MG42 3 (default yes)
+		globalaccum 9 set 1		// Enable MG42 4 (default yes)
+
+		// ===================================================================================
+		
+		// wait for everything to settle
+		wait 500
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "beach_advance_axis"
+		
+		wm_addteamvoiceannounce 0 "beach_sidewall_axis_defend"
+		wm_addteamvoiceannounce 0 "beach_sideentr_axis_defend"
+		wm_addteamvoiceannounce 0 "axis_hq_compost_construct"
+
+		wm_addteamvoiceannounce 1 "beach_entrances_allies_destroy"
+
+		wm_teamvoiceannounce 0 "beach_sidewall_axis_defend"
+		wm_teamvoiceannounce 0 "beach_sideentr_axis_defend"
+		wm_teamvoiceannounce 0 "axis_hq_compost_construct"
+
+		wm_teamvoiceannounce 1 "beach_entrances_allies_destroy"
+		// *---------------------------------------------------------------------------------*
+		
+        trigger world_clip load_ladder
+		trigger world_clip load_shutters
+		trigger world_clip load_mg42_1
+		trigger world_clip load_mg42_2
+		trigger world_clip load_mg42_3
+		trigger world_clip load_mg42_4
+		setstate allied_supply_bunker_wobj invisible
+		setstate allied_supply_bunker invisible
+		setstate axis_barracks_wobj invisible
+		setstate axis_barracks invisible
+	}
+	
+	trigger sirens
+	{
+		globalaccum 0 abort_if_bitset 2
+		globalaccum 0 bitset 2
+		wait 3000
+		alertentity sirens
+	}
+
+	trigger objective1
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Allied takes control of objective #1
+		wm_objective_status		1	0	2
+		wm_objective_status		1	1	1
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "beach_sidewall_axis_breached"
+		wm_teamvoiceannounce 1 "beach_sidewall_allies_breached"
+		
+		wm_removeteamvoiceannounce 0 "beach_sidewall_axis_defend"
+		wm_removeteamvoiceannounce 1 "beach_entrances_allies_destroy"
+		// *---------------------------------------------------------------------------------*
+	}
+	
+	trigger objective5
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Allied takes control of objective #1
+		wm_objective_status		5	0	2
+		wm_objective_status		5	1	1
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "beach_sideentr_axis_breached"
+		wm_teamvoiceannounce 1 "beach_sideentr_allies_breached"
+		
+		wm_removeteamvoiceannounce 0 "beach_sidewall_axis_defend"
+		wm_removeteamvoiceannounce 1 "beach_entrances_allies_destroy"
+		// *---------------------------------------------------------------------------------*
+	}
+
+	trigger objective2
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Allied takes control of objective #1
+		wm_objective_status		3	0	2
+		wm_objective_status		3	1	1
+
+		// Change the variable within the script so that we can check if someone wins the round
+		accum 1 set 1
+
+		// UI pop-up to alert players
+
+		// Call function to check if the round has been won
+		trigger game_manager checkgame
+	}
+
+	trigger axis_docs_stolen
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Allied have stolen the documents (0 == AXIS, 1 == ALLIED)
+		wm_objective_status		2	0	2
+		wm_objective_status		2	1	1
+
+	}
+
+	trigger axis_object_returned
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Axis have returned the documents (0 == AXIS, 1 == ALLIED)
+		wm_objective_status		2	0	0
+		wm_objective_status		2	1	0
+
+	}
+
+	trigger checkgame
+	{
+		accum 1 abort_if_not_equal 1
+		
+		wait 500
+		
+		wm_announce "Allies have transmitted the Documents!"
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 1 "beach_documents_allies_secured"
+		// *---------------------------------------------------------------------------------*
+		
+		// Set the round winner:  0 == AXIS, 1 == ALLIED
+		wm_setwinner 1
+
+		wait 1500
+		
+		// End the round
+		wm_endround
+	}
+
+	trigger beach_flagblue
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Allied takes control of checkpoint #1
+		wm_objective_status		4	1	1
+		wm_objective_status		4	0	2
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "beach_forwardbunker_axis_bluecap"
+		wm_teamvoiceannounce 1 "beach_forwardbunker_allies_bluecap"
+		// *---------------------------------------------------------------------------------*
+		
+		// flag script - timer to remove the flag
+		accum 7 set 0
+		globalaccum 1 abort_if_equal 0
+
+		wait 10000
+		accum 7 abort_if_equal 1
+		
+		wm_announce "^7Allies secure the Forward Bunker in ^250 ^7seconds!"
+
+		wait 20000
+		accum 7 abort_if_equal 1
+
+		wm_announce	"^7Allies secure the Forward Bunker in ^230 ^7seconds!"
+
+		wait 20000
+		accum 7 abort_if_equal 1
+
+		wm_announce	"^7Allies secure the Forward Bunker in ^210 ^7seconds!"
+
+		wait 10000
+		accum 7 abort_if_equal 1
+
+		wm_announce	"^7Allies have secured the Forward Bunker!"
+
+		wm_teamvoiceannounce 1 "allies_hq_objective_captured"
+		wm_teamvoiceannounce 0 "axis_hq_objective_lost"
+
+		trigger beach_flag final_capture
+		// flag script - end 
+	}
+
+	trigger beach_flagred
+	{
+		// Change the objective state internally, so UI can update, etc.
+		// Axis takes control of checkpoint #1
+		wm_objective_status		4	1	0
+		wm_objective_status		4	0	1
+		
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "beach_forwardbunker_axis_redcap"
+		wm_teamvoiceannounce 1 "beach_forwardbunker_allies_redcap"
+		// *---------------------------------------------------------------------------------*
+
+		// flag script - start timer stop
+		accum 7 set 1
+		// flag script - end 
+	}
+
+}
+
+allied_obj1 //Dummy ;)
+{
+	spawn
+	{
+		wait 200
+
+		constructible_class 3
+	}
+
+	death
+	{
+		
+	}
+}
+
+allied_obj1_1 //Sea Wall breached
+{
+	spawn
+	{
+		wait 200
+
+		constructible_class 3
+	}
+
+	death
+	{
+		wm_announce	"The Side Wall has been breached!"
+
+		trigger game_manager objective1
+		
+		trigger game_manager sirens
+		globalaccum 0 bitset 0				//Sea Wall breached
+		globalaccum 0 abort_if_bitset 1		//Abort if Side Door breached
+	}
+}
+
+allied_obj1_2 //Side Door breached
+{
+	spawn
+	{
+		wait 200
+
+		constructible_class 3
+	}
+
+	death
+	{
+		wm_announce	"The Side Entrance has been breached!"
+
+      	setstate axisteamdoor invisible 
+      	setstate axisteamdoor_toi invisible 
+
+		trigger game_manager objective5
+		
+		trigger game_manager sirens
+		globalaccum 0 bitset 1				//Side Door breached
+		globalaccum 0 abort_if_bitset 0		//Abort if Sea Wall breached
+
+	}
+}
+
+allied_obj2 //The war documents being transmitted.
+{
+	spawn
+	{
+	}
+	
+	trigger stolen 
+	{
+		setstate documents_marker invisible
+	}
+	  
+	trigger dropped
+	{
+		wm_announce "Documents dropped!"
+	}
+
+	trigger returned 
+	{ 
+		setstate documents_marker default
+	}
+	death
+	{
+		trigger game_manager objective2
+	}
+}
+
+beach_flag
+{
+	trigger axis_capture
+	{
+		trigger game_manager beach_flagred
+		wm_announce "Axis reclaimed the Forward Bunker!"
+
+		setstate beach_flag_wobj invisible
+	}
+
+	trigger allied_capture
+	{
+		trigger game_manager beach_flagblue
+		wm_announce "Allies captured the Forward Bunker!"
+
+		wait 400 
+		setstate beach_flag_wobj default
+		setautospawn "Forward Bunker" 1
+	}
+
+		// flag script - remove flag
+		trigger final_capture
+	{
+		remove
+	}
+		// flag script - end
+}
+
+// ================================================
+// ============ NEUTRAL COMMAND POST ==============
+// ================================================
+
+allied_compost_built
+{
+	spawn
+	{
+		wait 400
+		trigger allied_compost_built setup
+
+		constructible_class 2
+	}
+
+	trigger setup
+	{
+		setchargetimefactor 1 soldier 1
+		setchargetimefactor 1 lieutenant 1
+		setchargetimefactor 1 medic 1
+		setchargetimefactor 1 engineer 1
+		setchargetimefactor 1 covertops 1
+		sethqstatus 1 0
+	}
+
+	buildstart final
+	{
+		setstate allied_compost_built_model underconstruction
+		setstate neutral_compost_closed_model invisible
+	}
+
+	built final
+	{
+		setstate allied_compost_built_model default
+		setstate neutral_compost_closed_clip invisible
+		setstate neutral_compost_closed_model invisible
+
+		trigger allied_compost_built_model enable_allied_features
+
+		enablespeaker allies_compost_sound
+		
+		globalaccum 2 abort_if_equal 0
+		trigger allied_supply_bunker on
+	}
+
+	decayed final
+	{
+		setstate allied_compost_built_model invisible
+		setstate neutral_compost_closed_clip default
+		setstate neutral_compost_closed_model default
+	}
+
+	death
+	{
+		setstate allied_compost_built_model invisible
+		setstate neutral_compost_closed_clip default
+		setstate neutral_compost_closed_model default
+
+		trigger allied_compost_built_model disable_allied_features
+
+		disablespeaker allies_compost_sound
+		
+		globalaccum 2 abort_if_equal 0
+		trigger allied_supply_bunker off
+	}
+}
+
+allied_compost_built_model
+{
+	spawn
+	{
+		wait 400
+		setstate allied_compost_built_model invisible
+	}
+
+	trigger enable_allied_features
+	{
+		setchargetimefactor 1 soldier 0.75
+		setchargetimefactor 1 lieutenant 0.75
+		setchargetimefactor 1 medic 0.75
+		setchargetimefactor 1 engineer 0.75
+		setchargetimefactor 1 covertops 0.75
+		sethqstatus 1 1
+
+		wm_announce	"Allied Command Post constructed. Charge speed increased!"
+
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "axis_hq_compost_constructed_allies"
+
+		wm_teamvoiceannounce 1 "allies_hq_compost_constructed"
+
+		wm_removeteamvoiceannounce 1 "allies_hq_compost_construct"
+		// *---------------------------------------------------------------------------------*
+
+		wm_objective_status 6 0 2
+		wm_objective_status 6 1 1
+	}
+
+	trigger disable_allied_features
+	{
+		setchargetimefactor 1 soldier 1
+		setchargetimefactor 1 lieutenant 1
+		setchargetimefactor 1 medic 1
+		setchargetimefactor 1 engineer 1
+		setchargetimefactor 1 covertops 1
+		sethqstatus 1 0
+
+		wm_announce	"Axis team has destroyed the Allied Command Post!"
+
+		// *----------------------------------- vo ------------------------------------------*
+		wm_addteamvoiceannounce 0 "axis_hq_compost_construct"
+
+		wm_addteamvoiceannounce 1 "allies_hq_compost_construct"
+
+		wm_teamvoiceannounce 0 "axis_hq_compost_construct"
+
+		wm_teamvoiceannounce 1 "allies_hq_compost_damaged"
+		// *---------------------------------------------------------------------------------*
+
+		wm_objective_status 6 0 0
+		wm_objective_status 6 1 0
+	}
+}
+
+axis_compost_built
+{
+	spawn
+	{
+		wait 400
+		trigger axis_compost_built setup
+
+		constructible_class 2
+	}
+
+	trigger setup
+	{
+		setchargetimefactor 0 soldier 1
+		setchargetimefactor 0 lieutenant 1
+		setchargetimefactor 0 medic 1
+		setchargetimefactor 0 engineer 1
+		setchargetimefactor 0 covertops 1
+		sethqstatus 0 0
+	}
+
+	buildstart final
+	{
+		setstate axis_compost_built_model underconstruction
+		setstate neutral_compost_closed_model invisible
+	}
+
+	built final
+	{
+		setstate axis_compost_built_model default
+		setstate neutral_compost_closed_clip invisible
+		setstate neutral_compost_closed_model invisible
+
+		trigger axis_compost_built_model enable_axis_features
+
+		enablespeaker axis_compost_sound		
+		
+		globalaccum 3 abort_if_equal 0
+		trigger axis_barracks on
+	}
+
+	decayed final
+	{
+		setstate axis_compost_built_model invisible
+		setstate neutral_compost_closed_clip default
+		setstate neutral_compost_closed_model default
+	}
+
+	death
+	{
+		setstate axis_compost_built_model invisible
+		setstate neutral_compost_closed_clip default
+		setstate neutral_compost_closed_model default
+
+		trigger axis_compost_built_model disable_axis_features
+
+		disablespeaker axis_compost_sound
+		
+		globalaccum 3 abort_if_equal 0
+		trigger axis_barracks off
+	}
+}
+
+axis_compost_built_model
+{
+	spawn
+	{
+		wait 400
+		setstate axis_compost_built_model invisible
+	}
+
+	trigger enable_axis_features
+	{
+		setchargetimefactor 0 soldier 0.75
+		setchargetimefactor 0 lieutenant 0.75
+		setchargetimefactor 0 medic 0.75
+		setchargetimefactor 0 engineer 0.75
+		setchargetimefactor 0 covertops 0.75
+		sethqstatus 0 1
+
+		wm_announce	"Axis Command Post constructed. Charge speed increased!"
+
+		// *----------------------------------- vo ------------------------------------------*
+		wm_teamvoiceannounce 0 "axis_hq_compost_constructed"
+
+		wm_teamvoiceannounce 1 "allies_hq_compost_constructed_axis"
+
+		wm_removeteamvoiceannounce 0 "axis_hq_compost_construct"
+		// *---------------------------------------------------------------------------------*
+
+		wm_objective_status 6 0 1
+		wm_objective_status 6 1 2
+	}
+
+	trigger disable_axis_features
+	{
+		setchargetimefactor 0 soldier 1
+		setchargetimefactor 0 lieutenant 1
+		setchargetimefactor 0 medic 1
+		setchargetimefactor 0 engineer 1
+		setchargetimefactor 0 covertops 1
+		sethqstatus 0 0
+
+		wm_announce	"Allied team has destroyed the Axis Command Post!"
+
+		// *----------------------------------- vo ------------------------------------------*
+		wm_addteamvoiceannounce 0 "axis_hq_compost_construct"
+
+		wm_addteamvoiceannounce 1 "allies_hq_compost_construct"
+
+		wm_teamvoiceannounce 0 "axis_hq_compost_damaged"
+
+		wm_teamvoiceannounce 1 "allies_hq_compost_construct"
+		// *---------------------------------------------------------------------------------*
+
+		wm_objective_status 6 0 0
+		wm_objective_status 6 1 0
+	}
+}
+
+world_clip
+{
+	trigger load_ladder	
+	{
+		setstate fb_ladder invisible
+		setstate fb_hatch_open invisible
+		setstate fb_hatch_closed default
+		
+		globalaccum 4 abort_if_equal 0
+		setstate fb_ladder default
+		setstate fb_hatch_open default
+		setstate fb_hatch_closed invisible
+	}
+	
+	trigger load_shutters
+	{
+		setstate bunker_shutters invisible
+		globalaccum 5 abort_if_equal 0
+		setstate bunker_shutters default
+	}
+	
+	trigger load_mg42_1
+	{
+		setstate mg42_1 default
+		setstate mg42_1m default
+		globalaccum 6 abort_if_equal 1
+		kill mg42_1
+		kill mg42_1m
+	}
+
+	trigger load_mg42_2
+	{
+		setstate mg42_2 default
+		setstate mg42_2m default
+		globalaccum 7 abort_if_equal 1
+		kill mg42_2
+		kill mg42_2m
+	}	
+	
+	trigger load_mg42_3
+	{
+		setstate mg42_3 default
+		setstate mg42_3m default
+		globalaccum 8 abort_if_equal 1
+		kill mg42_3
+		kill mg42_3m
+	}
+	
+	trigger load_mg42_4
+	{
+		setstate mg42_4 default
+		setstate mg42_4m default
+		globalaccum 9 abort_if_equal 1
+		kill mg42_4
+		kill mg42_4m
+	}
+}
+
+allied_supply_bunker
+{	
+	trigger on
+	{               
+		setstate allied_supply_bunker_wobj default
+		setstate allied_supply_bunker default
+	}
+
+	trigger off
+	{
+		setstate allied_supply_bunker_wobj invisible
+		setstate allied_supply_bunker invisible
+	}
+}
+
+axis_barracks
+{	
+	trigger on
+	{               
+		setstate axis_barracks_wobj default
+		setstate axis_barracks default
+	}
+
+	trigger off
+	{
+		setstate axis_barracks_wobj invisible
+		setstate axis_barracks invisible
+	}
+}
+// ================================
+// ======= REMOVE LMS STUFF =======
+// ================================
+
+// LMS Command Post
+neutral_compost_toi_lms
+{
+	spawn
+	{
+		wait 50
+		setstate neutral_compost_toi_lms invisible
+	}
+}
+
+neutral_compost_clip_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+neutral_compost_closed_clip_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+neutral_compost_closed_model_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+allied_compost_built_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+allied_compost_built_model_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+axis_compost_built_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
+
+axis_compost_built_model_lms
+{
+	spawn
+	{
+		wait 400
+		remove
+	}
+}
