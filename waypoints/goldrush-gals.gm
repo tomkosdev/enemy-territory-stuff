@@ -1203,11 +1203,11 @@ global OnMapLoad = function()
 	Wp.SetWaypointFlag("rail3", "closed", true);
 	Wp.SetWaypointFlag("wallbreach", "closed", true);
 	Wp.SetWaypointFlag("onewaydoor1", "door", true);
-	Wp.SetWaypointFlag("onewaydoor2", "door", true);
+	//Wp.SetWaypointFlag("onewaydoor2", "door", true);
 	Wp.SetWaypointFlag("onewaydoor3", "door", true);
 	Wp.SetWaypointFlag("onewaydoor4", "door", true);
 	Wp.SetWaypointFlag("onewaydoor5", "door", true);
-	Wp.SetWaypointFlag("onewaydoor6", "door", true);
+	//Wp.SetWaypointFlag("onewaydoor6", "door", true);
 	Wp.SetWaypointFlag("onewaydoor7", "door", true);
 	Wp.SetWaypointFlag("onewaydoor8", "door", true);
 
@@ -1862,4 +1862,11 @@ global OnMapLoad = function()
 	Util.Routes(MapRoutes);
 	Util.UpdateSwitchData();
 	Util.MapDebugPrint( "OnMapLoad" );
+};
+
+
+global OnBotJoin = function( bot )
+{
+	bot.TargetBreakableDist = 70.0;
+
 };
