@@ -535,7 +535,7 @@ global OnMapLoad = function()
 	//OnTrigger( "thirty second warning.", Map.Thirty_second );
 
 	Gate = OnTriggerRegion(AABB(-680.621,2165.875,9.125,-650.621,2168.875,25.125), Map.Gate);
-	Gate1 = OnTriggerRegion(AABB(-700.517,1980.004,9.125,-630.847,2172.875,83.125), Map.Gate1);
+	Gate1 = OnTriggerRegion(AABB(-700.517,2080.004,9.125, -630.847,2172.875,83.125), Map.Gate1);
 
 	AlliedEngsNearNorthRadar = OnTriggerRegion(AABB(63.125,2232.269,321.125,290.752,2598.774,465.491), Map.Allied_Engs_near_North_Radar);
 	AlliedEngsNearSouthRadar = OnTriggerRegion(AABB(447.125,254.349,321.125,652.474,630.238,443.083), Map.Allied_Engs_near_South_Radar);
@@ -622,6 +622,7 @@ global OnMapLoad = function()
 		"ATTACK_Allies_NorthRadar_03",
 		"ATTACK_Allies_NorthRadar_04",
 		"ATTACK_Allies_NorthRadar_05",
+
 		//"CAPPOINT_Documents",
 		//"FLAG_documents",
 	});
@@ -680,174 +681,7 @@ global OnMapLoad = function()
 	Util.SetMaxUsers( 2, "DEFEND_Axis_NorthRadar_11" );
 	Util.SetMaxUsers( 2, "DEFEND_Axis_SouthRadar_10" );
 
-	MapRoutes =
-	{
-		PLANT_South_Radar =
-		{
-			ROUTE_Allied_Spawn =
-			{
-				ROUTE_Door =
-				{
-					ROUTE_Office =
-					{
-						ROUTE_CP =
-						{
 
-						},
-						ROUTE_Wooden_Boxes =
-						{
-							ROUTE_Stairs =
-							{
-
-							},
-						},
-					},
-				},
-				ROUTE_Ladder =
-				{
-					ROUTE_Storage =
-					{
-						ROUTE_CP =
-						{
-
-						},
-					},
-				},
-			},
-
-			ROUTE_Above_Gate =
-			{
-				ROUTE_Above_Gate_2 =
-				{
-					ROUTE_Outside = 
-					{
-
-					},
-				},
-			},
-
-
-		},
-
-
-
-
-
-		PLANT_North_Radar =
-		{
-			ROUTE_Allied_Spawn =
-			{
-
-				ROUTE_Under_Spawn =
-				{
-					ROUTE_Gate =
-					{
-						ROUTE_3 =
-						{
-							ROUTE_Metal_Stairs =
-							{
-
-							},
-						},
-					},
-
-					ROUTE_Above_Gate =
-					{
-						ROUTE_Above_Gate_2 =
-						{
-
-						},
-					},
-
-				},
-
-				ROUTE_Water =
-				{
-					ROUTE_Gate =
-					{
-						ROUTE_3 =
-						{
-							ROUTE_Metal_Stairs =
-							{
-
-							},
-						},
-					},
-
-					ROUTE_Above_Gate =
-					{
-						ROUTE_Above_Gate_2 =
-						{
-
-						},
-					},
-
-				},
-
-
-
-
-
-				// ROUTE_Door =
-				// {
-				// 	ROUTE_Office =
-				// 	{
-				// 		ROUTE_CP =
-				// 		{
-				// 			ROUTE_Outside =
-				// 			{
-
-				// 			},
-				// 		},
-
-				// 		ROUTE_Wooden_Boxes =
-				// 		{
-				// 			ROUTE_Truck =
-				// 			{
-				// 				ROUTE_Near_Axis_Spawn =
-				// 				{
-				// 					ROUTE_3 =
-				// 					{
-				// 						ROUTE_Metal_Stairs =
-				// 						{
-
-				// 						},
-				// 					},
-				// 					ROUTE_MG =
-				// 					{
-				// 						ROUTE_Roof =
-				// 						{
-
-				// 						},
-				// 					},
-				// 				},
-				// 			},
-				// 		},
-				// 	},
-				// },
-
-				ROUTE_Ladder =
-				{
-					ROUTE_Storage =
-					{
-						ROUTE_CP =
-						{
-							ROUTE_Outside =
-							{
-
-							},
-						},
-					},
-				},
-			},
-		},
-
-
-
-		
-	};
-
-	Util.Routes(MapRoutes);
 
 	WeaponTable.SetWeaponAvailability( CLASS.SOLDIER, WEAPON.FLAMETHROWER, false );
 	WeaponTable.SetWeaponAvailability( CLASS.SOLDIER, WEAPON.MORTAR, false );
@@ -907,4 +741,110 @@ global OnBotJoin = function( bot )
 	WeaponTable.SetWeaponAvailability( CLASS.SOLDIER, WEAPON.MORTAR, false );
 	WeaponTable.SetWeaponAvailability( CLASS.SOLDIER, WEAPON.MORTAR_SET, false );
 	WeaponTable.SetWeaponAvailability( CLASS.SOLDIER, WEAPON.STG44, false );
+};
+
+
+global InitializeRoutes = function()
+{
+
+	MapRoutes =
+	{
+		PLANT_South_Radar =
+		{
+			ROUTE_Allied_Spawn =
+			{
+				ROUTE_Door =
+				{
+					ROUTE_Office =
+					{
+						ROUTE_CP =
+						{
+
+						},
+						ROUTE_Wooden_Boxes =
+						{
+							ROUTE_Stairs =
+							{
+
+							},
+						},
+					},
+				},
+				ROUTE_Ladder =
+				{
+					ROUTE_Storage =
+					{
+						ROUTE_CP =
+						{
+
+						},
+					},
+				},
+			},
+		},
+
+
+		PLANT_North_Radar =
+		{
+			ROUTE_Allied_Spawn =
+			{
+
+				ROUTE_Under_Spawn =
+				{
+					ROUTE_Gate =
+					{
+						ROUTE_3 =
+						{
+							ROUTE_Metal_Stairs =
+							{
+
+							},
+						},
+					},
+
+					ROUTE_Above_Gate =
+					{
+						ROUTE_Above_Gate_2 =
+						{
+
+						},
+					},
+
+				},
+
+				ROUTE_Water =
+				{
+					ROUTE_Gate =
+					{
+						ROUTE_3 =
+						{
+							ROUTE_Metal_Stairs =
+							{
+
+							},
+						},
+					},
+
+					ROUTE_Above_Gate =
+					{
+						ROUTE_Above_Gate_2 =
+						{
+
+						},
+					},
+
+				},
+
+			},
+		},
+
+	};
+
+	//copy some routes
+
+	MapRoutes["BUILD_Command_Post"] = MapRoutes.PLANT_South_Radar;
+	MapRoutes["ATTACK_Allies_SouthRadar_.*"] = MapRoutes.PLANT_South_Radar;
+	MapRoutes["ATTACK_Allies_NorthRadar_.*"] = MapRoutes.PLANT_North_Radar;
+
+	Util.Routes(MapRoutes);
 };

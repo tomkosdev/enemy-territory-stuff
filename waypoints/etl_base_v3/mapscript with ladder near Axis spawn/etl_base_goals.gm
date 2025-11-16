@@ -373,7 +373,7 @@ global _MG =
 		GoalType = "Defend",
 		MaxCampTime = 40,
 		MinCampTime = 20,
-		Position = Vec3(621.875, 2921.875, 321.125),
+		Position = Vec3(579.594, 2919.229, 320.125),
 		Radius = 32,
 	},
 	DEFEND_Axis_NorthRadar_04 = 
@@ -698,6 +698,7 @@ global _MG =
 	{
 		CreateOnLoad = 0,
 		GoalType = "Flag",
+		Name = "FLAG_documents",
 		Position = Vec3(1376.000, 2928.000, 245.125),
 		TeamAvailability = 4,
 	},
@@ -904,6 +905,7 @@ global _MG =
 		CreateOnLoad = 0,
 		ExplosiveType = 1,
 		GoalType = "PLANT",
+		Name = "PLANT_Gate",
 		Position = Vec3(-664.000, 1984.000, 66.000),
 		TeamAvailability = 4,
 	},
@@ -1008,7 +1010,7 @@ global _MG =
 	ROUTE_Ladder = 
 	{
 		GoalType = "ROUTE",
-		Position = Vec3(-1361.375, -926.360, 297.125),
+		Position = Vec3(-1289.775, -961.686, 296.125),
 		Radius = 35,
 	},
 	ROUTE_MG = 
@@ -1068,7 +1070,7 @@ global _MG =
 	ROUTE_Under_Spawn = 
 	{
 		GoalType = "ROUTE",
-		Position = Vec3(-2134.710, -1065.083, 33.284),
+		Position = Vec3(-2195.777, -507.952, 32.125),
 		Radius = 125,
 	},
 	ROUTE_Water = 
