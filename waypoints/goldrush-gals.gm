@@ -11,6 +11,15 @@ UPDATED: August 16, 2011
 - Once bank doors are blown, at least half of allied bots will
   change to original spawn.
 *******************************************************************/
+/******************************************************************
+UPDATED BY: TomekKromek FOR: goldrush-gals
+UPDATED: November 17, 2025
+- Added truck barrier 1 & 2 plant positions
+- Bank staircase waypoints fixed
+- SetSpawn fixed
+- Added ESCORT_tank goal 
+- Removed elevators code
+*******************************************************************/
 
 global Map =
 {
@@ -79,6 +88,8 @@ global Map =
 	near_defense_two = false,
 	near_defense_three = false,
 	near_defense_four = false,
+	truck_past_b1 = false,
+
 
 	// region triggers
 	iw1 = 0,
@@ -92,144 +103,32 @@ global Map =
 	bThreeDyno = 0,
 	bFourDyno = 0,
 
+											
+	// set bot spawns after tank run is over
+	SetSpawn1 = function(bot)
+	{
+		if (bot.GetTeam() == TEAM.ALLIES) {
+			if (Map.EndTankRun && RandInt(0,9) < 4) {
+				bot.ChangeSpawnPoint(3);
+			} else if (Map.truck_past_b1) {
+				bot.ChangeSpawnPoint(3);
+			} else {
+				bot.ChangeSpawnPoint(2);
+			}
+		}
+	},
+
+	SetSpawn = function()
+	{
+		foreach(bot in BotTable)
+		{
+			Map.SetSpawn1(bot);
+		}
+	},
+
+
 	Switches =
 	{
-		e1_top1 =
-		{
-			Enabled = true,
-			Priority = 0.0,
-			WaypointName = "e1_top1",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator1Pos == "top" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e1_top2 =
-		{
-			Enabled = false,
-			Priority = 0.0,
-			WaypointName = "e1_top2",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator1Pos == "bottom" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e1_bot1 =
-		{
-			Enabled = false,
-			Priority = 0.0,
-			WaypointName = "e1_bot1",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator1Pos == "bottom" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e1_bot2 =
-		{
-			Enabled = true,
-			Priority = 0.0,
-			WaypointName = "e1_bot2",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator1Pos == "top" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e2_top1 =
-		{
-			Enabled = true,
-			Priority = 0.0,
-			WaypointName = "e2_top1",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator2Pos == "top" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e2_top2 =
-		{
-			Enabled = false,
-			Priority = 0.0,
-			WaypointName = "e2_top2",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator2Pos == "bottom" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e2_bot1 =
-		{
-			Enabled = false,
-			Priority = 0.0,
-			WaypointName = "e2_bot1",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator2Pos == "bottom" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
-		e2_bot2 =
-		{
-			Enabled = true,
-			Priority = 0.0,
-			WaypointName = "e2_bot2",
-			Timeout = 10000,
-
-			Wait = function()
-			{
-				if ( Map.Elevator2Pos == "top" )
-				{
-					sleep(1);
-					return true;
-				}
-				return false;
-			},
-		},
 		window =
 		{
 			Enabled = true,
@@ -239,67 +138,6 @@ global Map =
 		},
 	},
 
-	Elevator1Pos = "bottom",
-	Elevator1 = function(trigger)
-	{
-		Map.Elevator1Pos = "moving";
-		Util.MapDebugPrint("Elevator1 moving", true);
-
-		Map.Switches.e1_top1.Enabled = false;
-		Map.Switches.e1_top2.Enabled = false;
-		Map.Switches.e1_bot1.Enabled = false;
-		Map.Switches.e1_bot2.Enabled = false;
-
-		sleep(7);
-
-		vel = ToVector(trigger.Action);
-
-		if (vel.z < 0)
-		{
-			Map.Elevator1Pos = "bottom";
-			Map.Switches.e1_top1.Enabled = true;
-			Map.Switches.e1_bot2.Enabled = true;
-			Util.MapDebugPrint("Elevator1 at bottom", true);
-		}
-		else
-		{
-			Map.Elevator1Pos = "top";
-			Map.Switches.e1_bot1.Enabled = true;
-			Map.Switches.e1_top2.Enabled = true;
-			Util.MapDebugPrint("Elevator1 at top", true);
-		}
-	},
-
-	Elevator2Pos = "bottom",
-	Elevator2 = function(trigger)
-	{
-		Map.Elevator2Pos = "moving";
-		Util.MapDebugPrint("Elevator1 moving", true);
-
-		Map.Switches.e2_top1.Enabled = false;
-		Map.Switches.e2_top2.Enabled = false;
-		Map.Switches.e2_bot1.Enabled = false;
-		Map.Switches.e2_bot2.Enabled = false;
-
-		sleep(7);
-
-		vel = ToVector(trigger.Action);
-
-		if (vel.z < 0)
-		{
-			Map.Elevator2Pos = "bottom";
-			Map.Switches.e2_top1.Enabled = true;
-			Map.Switches.e2_bot2.Enabled = true;
-			Util.MapDebugPrint("Elevator2 at bottom", true);
-		}
-		else
-		{
-			Map.Elevator2Pos = "top";
-			Map.Switches.e2_bot1.Enabled = true;
-			Map.Switches.e2_top2.Enabled = true;
-			Util.MapDebugPrint("Elevator2 at top", true);
-		}
-	},
 
 	Command_Post_Built = function( trigger )
 	{
@@ -318,6 +156,7 @@ global Map =
 		if ( !Map.EndTankRun )
 		{
 			SetAvailableMapGoals( TEAM.ALLIES, true, "MOUNT_tank" );
+			SetAvailableMapGoals( TEAM.ALLIES, true, "ESCORT_tank" );
 		}
 
 		Util.MapDebugPrint( "Tank_Built" );
@@ -582,19 +421,7 @@ global Map =
 
 		Map.EndTankRun = true;
 
-		numAlliedBots = 0;
-		foreach ( id and bot in BotTable )
-		{
-			if ( bot.GetTeam() == TEAM.ALLIES )
-			{
-				numAllies += 1;
-				if ( numAlliedBots % 2 == 0 )
-				{
-					bot.ChangeSpawnPoint( 3 );
-				}
-			}
-		}
-
+		Map.SetSpawn();
 
 		// Allied goals
 		SetAvailableMapGoals( TEAM.ALLIES, false, {
@@ -612,6 +439,8 @@ global Map =
 			"SMOKEBOMB_bank.*",
 		});
 		SetAvailableMapGoals( TEAM.ALLIES, false, "MOUNT_tank" );
+		SetAvailableMapGoals( TEAM.ALLIES, false, "ESCORT_tank" );
+
 
 		// Axis goals
 		SetAvailableMapGoals( TEAM.AXIS, false, Map.Mount_mg42_bridge );
@@ -683,15 +512,19 @@ global Map =
 	truck_past_barrier1 = function( trigger )
 	{
 		Map.near_defense_three = false;
+		Map.truck_past_b1 = true;
 
 		Util.OnTriggerPosition( Map.Mover_truck, "truckmarker2", 200.0,
 			Map.tank_at_barrier2 );
 
-		foreach ( id and bot in BotTable )
-		{
-			if ( bot.GetTeam() == TEAM.ALLIES )
-				{ bot.ChangeSpawnPoint( 3 ); }
-		}
+		// foreach ( id and bot in BotTable )
+		// {
+		// 	if ( bot.GetTeam() == TEAM.ALLIES )
+		// 		{ bot.ChangeSpawnPoint( 3 ); }
+		// }
+
+		Map.SetSpawn();
+
 
 		// Allied goals
 		SetAvailableMapGoals( TEAM.ALLIES, false, "ATTACK_Truck_Barrier1_.*" );
@@ -742,6 +575,7 @@ global Map =
 	{
 		Util.SetPositionGoal( Map.Build_Tank, Map.Mover_tank );
 		SetAvailableMapGoals( TEAM.ALLIES, false, "MOUNT_tank" );
+		SetAvailableMapGoals( TEAM.ALLIES, false, "ESCORT_tank" );
 
 		Util.MapDebugPrint( "Tank_Destroyed" );
 	},
@@ -1077,8 +911,6 @@ global OnMapLoad = function()
 	OnTrigger( "bankdoorfloor2_start", Map.Bankdoor1 );
 	OnTrigger( "bankdoorfloor2b_start", Map.Bankdoor2 );
 	OnTrigger( "bankdoorfloor1a_start", Map.Bankdoor3 );
-	OnTrigger( "elevator1_goto", Map.Elevator1 );
-	OnTrigger( "elevator2_goto", Map.Elevator2 );
 	OnTrigger( "secdoor3a_start", Map.Secret_Window );
 	OnTrigger( "secdoor1a_start", Map.secdoor1a );
 
@@ -1087,10 +919,48 @@ global OnMapLoad = function()
 	Util.SetPositionGoal( Map.Build_Truck, Map.Mover_truck ); //truck too
 
 	//Additional plant positions for Tank Barrier 1
-	Util.AddUsePoint( "PLANT_Tank_Barrier_1", { Vec3(935, 611, 8), Vec3(628, 524, -1), Vec3(545, 465, 3), Vec3(647, 613, 8) } );
+	Util.AddUsePoint( "PLANT_Tank_Barrier_1", { 
+		Vec3(935, 611, 8), 
+		Vec3(628, 524, -1), 
+		Vec3(545, 465, 3), 
+		Vec3(647, 613, 8) 
+	} );
 
 	//Additional plant positions for Tank Barrier 2
-	Util.AddUsePoint( "PLANT_Tank_Barrier_2", { Vec3(2030, 253, -401), Vec3(1631, 251, -413), Vec3(1653, 304, -285), Vec3(1581, -130, -183), Vec3(2042, 480, -403) } );
+	Util.AddUsePoint( "PLANT_Tank_Barrier_2", { 
+		Vec3(2030, 253, -401), 
+		Vec3(1631, 251, -413), 
+		Vec3(1653, 304, -285), 
+		Vec3(1581, -130, -183), 
+		Vec3(2042, 480, -403) 
+	} );
+
+	//Additional plant positions for Truck Barriers
+	Util.AddUsePoint( "PLANT_Truck_Barrier_1", { 
+		Vec3(89.706, -625.103, -139.683), 
+		Vec3(88, -624, -151), 
+		Vec3(263, -632, -169),
+		Vec3(88, -624, -151),  
+	} );
+
+	Util.AddUsePoint( "PLANT_Truck_Barrier_1", {
+		Vec3(85, -574, -191),
+		Vec3(256, -523, -205),
+		Vec3(175, -854, -183),
+		Vec3(54, -742, -191),
+		Vec3(264, -670, -209)
+	} );
+
+
+	Util.AddUsePoint( "PLANT_Truck_Barrier_2", { 
+		Vec3(-2274,-859,-34), 
+		Vec3(-2271,-698,-35),
+		Vec3(-2436,-680,-35),
+		Vec3(-2452,-836,-37)
+	} );
+
+
+
 
 	// Max users per goal
 	Util.SetMaxUsersInProgress( 1, "ATTACK_Depot_.*" );
@@ -1108,10 +978,13 @@ global OnMapLoad = function()
 	Util.SetMaxUsersInProgress( 1, "MOUNTMG42_.*" );
 	Util.SetMaxUsersInProgress( 1, "SMOKEBOMB_.*" );
 
+	Util.SetMaxUsers( 2, "ESCORT_tank" );
+
+
 	SetMapGoalProperties( "ATTACK_.*", {MinCampTime=5, MaxCampTime=10} );
 	SetMapGoalProperties( "DEFEND_.*", {MinCampTime=5, MaxCampTime=20} );
 	SetMapGoalProperties( "MOUNTMG42_.*", {MinCampTime=60, MaxCampTime=120} );
-	SetMapGoalProperties( "MOBILEMG42_.*", {MinCampTime=120, MaxCampTime=120}  );
+	//SetMapGoalProperties( "MOBILEMG42_.*", {MinCampTime=120, MaxCampTime=120}  );
 	SetMapGoalProperties( "SNIPE_.*", {MinCampTime=120, MaxCampTime=120} );
 
 	SetGoalPriority( "MOUNTMG42_.*", 0.0, 0, CLASS.MEDIC );
@@ -1162,6 +1035,7 @@ global OnMapLoad = function()
 		"GRENADE_bank_mg",
 		"ESCORT_truck",
 		"MOUNT_tank",
+		"ESCORT_tank",
 	});
 
 	// Axis goals
@@ -1171,6 +1045,8 @@ global OnMapLoad = function()
 	SetGoalPriority( Map.Build_Truck_Barrier_1, 0.91, TEAM.AXIS, CLASS.ENGINEER );
 	SetGoalPriority( Map.Plant_Command_Post, 0.0, TEAM.AXIS, CLASS.ENGINEER );
 	SetGoalPriority( "DEFEND_Depot_[14]", 0.6, TEAM.AXIS ); //try and keep these two occupied
+
+
 
 	SetAvailableMapGoals( TEAM.AXIS, false, {
 		Map.Ammo_Cabinet_north_ammocabinet,
@@ -1192,6 +1068,7 @@ global OnMapLoad = function()
 		"PLANTMINE.*",
 		"AIRSTRIKE_.*",
 		"GRENADE_bank_mg",
+		"ESCORT_tank",
 	});
 	SetAvailableMapGoals( TEAM.AXIS, true, "DEFEND_Depot_.*" );
 
@@ -1203,11 +1080,11 @@ global OnMapLoad = function()
 	Wp.SetWaypointFlag("rail3", "closed", true);
 	Wp.SetWaypointFlag("wallbreach", "closed", true);
 	Wp.SetWaypointFlag("onewaydoor1", "door", true);
-	//Wp.SetWaypointFlag("onewaydoor2", "door", true);
+	Wp.SetWaypointFlag("onewaydoor2", "door", true);
 	Wp.SetWaypointFlag("onewaydoor3", "door", true);
 	Wp.SetWaypointFlag("onewaydoor4", "door", true);
 	Wp.SetWaypointFlag("onewaydoor5", "door", true);
-	//Wp.SetWaypointFlag("onewaydoor6", "door", true);
+    Wp.SetWaypointFlag("onewaydoor6", "door", true);
 	Wp.SetWaypointFlag("onewaydoor7", "door", true);
 	Wp.SetWaypointFlag("onewaydoor8", "door", true);
 
@@ -1632,6 +1509,7 @@ global OnMapLoad = function()
 				},
 				ROUTE_wallbreach =
 				{
+					Weight = 2,
 				},
 			},
 			ROUTE_TankYardSpawn =
@@ -1868,5 +1746,5 @@ global OnMapLoad = function()
 global OnBotJoin = function( bot )
 {
 	bot.TargetBreakableDist = 70.0;
-
+	Map.SetSpawn1(bot);
 };
